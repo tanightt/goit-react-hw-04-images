@@ -1,31 +1,44 @@
-export const Modal = () => {
-  return (
-    <div class="overlay">
-      <div class="modal">
-        <img src="" alt="" />
-      </div>
-    </div>
-  );
-};
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { ModalWindow, Overlay } from './Modal.styled';
 
-/*
- * Стили компонента Modal
- */
+export class Modal extends Component {
+  static propTypes = {
+    selectedImage: PropTypes.string,
+    tags: PropTypes.string,
+    onClick: PropTypes.func,
+  };
 
-// .Overlay {
-//   position: fixed;
-//   top: 0;
-//   left: 0;
-//   width: 100vw;
-//   height: 100vh;
-//   display: flex;
-//   justify-content: center;
-//   align-items: center;
-//   background-color: rgba(0, 0, 0, 0.8);
-//   z-index: 1200;
-// }
+  componentDidMount() {
+    window.addEventListener('keydown', this.handleKeyDown);
+  }
 
-// .Modal {
-//   max-width: calc(100vw - 48px);
-//   max-height: calc(100vh - 24px);
-// }
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this.handleKeyDown);
+  }
+
+  handleKeyDown = e => {
+    if (e.code === 'Escape') {
+      this.props.onClick();
+    }
+  };
+
+  handleBackdropClick = e => {
+    if (e.target === e.currentTarget) {
+      this.props.onClick();
+    }
+  };
+
+  render() {
+    const { selectedImage, tags } = this.props;
+    return (
+      <Overlay onClick={this.handleBackdropClick}>
+        <ModalWindow>
+          <img src={selectedImage} alt={tags} />
+        </ModalWindow>
+      </Overlay>
+    );
+  }
+}
+
+export default Modal;

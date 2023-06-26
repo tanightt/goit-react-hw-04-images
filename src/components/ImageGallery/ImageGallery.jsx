@@ -1,25 +1,30 @@
+import PropTypes from 'prop-types';
+import { GalleryList } from './ImageGallery.styled';
 import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
 
-export const ImageGallery = params => {
+export const ImageGallery = ({ gallery, selectedImage }) => {
   return (
-    <ul class="gallery">
-      <ImageGalleryItem />
-    </ul>
+    <GalleryList>
+      {gallery.map(({ webformatURL, tags, largeImageURL }) => (
+        <ImageGalleryItem
+          key={crypto.randomUUID()}
+          previewImg={webformatURL}
+          tags={tags}
+          selectedImage={() => selectedImage(largeImageURL, tags)}
+        />
+      ))}
+    </GalleryList>
   );
 };
 
-/*
- * Стили компонента ImageGallery
- */
-// .ImageGallery {
-//   display: grid;
-//   max-width: calc(100vw - 48px);
-//   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-//   grid-gap: 16px;
-//   margin-top: 0;
-//   margin-bottom: 0;
-//   padding: 0;
-//   list-style: none;
-//   margin-left: auto;
-//   margin-right: auto;
-// }
+ImageGallery.propTypes = {
+  gallery: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      webformatURL: PropTypes.string.isRequired,
+      tags: PropTypes.string.isRequired,
+      largeImageURL: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+  selectedImage: PropTypes.func,
+};
