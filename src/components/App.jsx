@@ -69,7 +69,8 @@ export class App extends Component {
   };
 
   render() {
-    const { gallery, loading, showModal, selectedImage, alt } = this.state;
+    const { gallery, loading, page, showModal, selectedImage, alt } =
+      this.state;
     const { handleSubmit, handleLoadMore, toggleModal } = this;
     return (
       <AppContainer>
@@ -80,10 +81,9 @@ export class App extends Component {
           gallery={gallery}
           selectedImage={this.handleSelectedImage}
         />
-        {gallery.length !== 0 &&
-          gallery.length < Math.ceil(this.cardTotal / 12) && (
-            <Button onClick={handleLoadMore} />
-          )}
+        {gallery.length !== 0 && page < Math.ceil(this.cardTotal / 12) && (
+          <Button onClick={handleLoadMore} />
+        )}
         {showModal && (
           <Modal
             selectedImage={selectedImage}
