@@ -33,7 +33,6 @@ export class App extends Component {
       const { hits, totalHits } = response;
       const cardData = hits;
       this.cardTotal = totalHits;
-      console.log(this.cardTotal);
       this.setState(({ gallery }) => ({
         gallery: [...gallery, ...cardData],
       }));
