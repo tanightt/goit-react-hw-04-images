@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import axios from 'axios';
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Loader } from './Loader/Loader';
 import { styled } from 'styled-components';
 import { Button } from './Button/Button';
 import { Modal } from './Modal/Modal';
+import { fetchGallery } from 'services/api';
 
 export class App extends Component {
   state = {
@@ -17,43 +17,29 @@ export class App extends Component {
     selectedImage: '',
     alt: null,
   };
+  cardTotal = null;
 
-  async componentDidMount() {
-    const { searchValue, page } = this.state;
-    await this.handleFetchGallery(searchValue, page);
-  }
-
-  async componentDidUpdate(_, prevState) {
+  componentDidUpdate(_, prevState) {
     const { searchValue, page } = this.state;
     if (prevState.searchValue !== searchValue || prevState.page !== page) {
-      await this.handleFetchGallery(searchValue, page);
+      this.handleFetchGallery(searchValue, page);
     }
   }
 
   handleFetchGallery = async (searchValue, page) => {
-    if (!searchValue) {
-      return;
-    }
-
     this.setState({ loading: true });
     try {
-      const response = await axios.get('https://pixabay.com/api/', {
-        params: {
-          q: searchValue,
-          page: page,
-          key: '37045693-8aefe551e2e8551a000bf542b',
-          image_type: 'photo',
-          orientation: 'horizontal',
-          per_page: 12,
-        },
-      });
-      const cardData = response.data.hits;
+      const response = await fetchGallery(searchValue, page);
+      const { hits, totalHits } = response;
+      const cardData = hits;
+      this.cardTotal = totalHits;
+      console.log(this.cardTotal);
       this.setState(({ gallery }) => ({
         gallery: [...gallery, ...cardData],
-        loading: false,
       }));
     } catch (error) {
       console.error(error);
+    } finally {
       this.setState({ loading: false });
     }
   };
@@ -94,7 +80,10 @@ export class App extends Component {
           gallery={gallery}
           selectedImage={this.handleSelectedImage}
         />
-        {gallery.length !== 0 && <Button onClick={handleLoadMore} />}
+        {gallery.length !== 0 &&
+          gallery.length < Math.ceil(this.cardTotal / 12) && (
+            <Button onClick={handleLoadMore} />
+          )}
         {showModal && (
           <Modal
             selectedImage={selectedImage}

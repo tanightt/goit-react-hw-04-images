@@ -5,9 +5,9 @@ import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
 export const ImageGallery = ({ gallery, selectedImage }) => {
   return (
     <GalleryList>
-      {gallery.map(({ webformatURL, tags, largeImageURL }) => (
+      {gallery.map(({ id, webformatURL, tags, largeImageURL }) => (
         <ImageGalleryItem
-          key={crypto.randomUUID()}
+          key={id}
           previewImg={webformatURL}
           tags={tags}
           selectedImage={() => selectedImage(largeImageURL, tags)}
