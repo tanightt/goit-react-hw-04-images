@@ -16,8 +16,8 @@ export class App extends Component {
     showModal: false,
     selectedImage: '',
     alt: null,
+    cardTotal: null,
   };
-  cardTotal = null;
 
   componentDidUpdate(_, prevState) {
     const { searchValue, page } = this.state;
@@ -31,10 +31,9 @@ export class App extends Component {
     try {
       const response = await fetchGallery(searchValue, page);
       const { hits, totalHits } = response;
-      const cardData = hits;
-      this.cardTotal = totalHits;
       this.setState(({ gallery }) => ({
-        gallery: [...gallery, ...cardData],
+        gallery: [...gallery, ...hits],
+        cardTotal: totalHits,
       }));
     } catch (error) {
       console.error(error);
@@ -68,7 +67,7 @@ export class App extends Component {
   };
 
   render() {
-    const { gallery, loading, page, showModal, selectedImage, alt } =
+    const { gallery, loading, page, showModal, selectedImage, alt, cardTotal } =
       this.state;
     const { handleSubmit, handleLoadMore, toggleModal } = this;
     return (
@@ -80,7 +79,7 @@ export class App extends Component {
           gallery={gallery}
           selectedImage={this.handleSelectedImage}
         />
-        {gallery.length !== 0 && page < Math.ceil(this.cardTotal / 12) && (
+        {gallery.length !== 0 && page < Math.ceil(cardTotal / 12) && (
           <Button onClick={handleLoadMore} />
         )}
         {showModal && (
