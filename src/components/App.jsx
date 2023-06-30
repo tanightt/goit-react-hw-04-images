@@ -1,100 +1,78 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
+import { styled } from 'styled-components';
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Loader } from './Loader/Loader';
-import { styled } from 'styled-components';
 import { Button } from './Button/Button';
 import { Modal } from './Modal/Modal';
 import { fetchGallery } from 'services/api';
 
-export class App extends Component {
-  state = {
-    gallery: [],
-    loading: false,
-    searchValue: '',
-    page: 1,
-    showModal: false,
-    selectedImage: '',
-    alt: null,
-    cardTotal: null,
-  };
+export const App = () => {
+  const [gallery, setGallery] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
+  const [page, setPage] = useState(1);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState('');
+  const [alt, setAlt] = useState(null);
+  const [cardTotal, setCardTotal] = useState(null);
 
-  componentDidUpdate(_, prevState) {
-    const { searchValue, page } = this.state;
-    if (prevState.searchValue !== searchValue || prevState.page !== page) {
-      this.handleFetchGallery(searchValue, page);
+  useEffect(() => {
+    if (searchValue === '') {
+      return;
     }
-  }
+    handleFetchGallery(searchValue, page);
+  }, [searchValue, page]);
 
-  handleFetchGallery = async (searchValue, page) => {
-    this.setState({ loading: true });
+  const handleFetchGallery = async (searchValue, page) => {
+    setLoading(true);
     try {
       const response = await fetchGallery(searchValue, page);
       const { hits, totalHits } = response;
-      this.setState(({ gallery }) => ({
-        gallery: [...gallery, ...hits],
-        cardTotal: totalHits,
-      }));
+      setGallery(prev => [...prev, ...hits]);
+      setCardTotal(totalHits);
     } catch (error) {
       console.error(error);
     } finally {
-      this.setState({ loading: false });
+      setLoading(false);
     }
   };
 
-  handleSubmit = searchValue => {
-    this.setState({ searchValue, gallery: [], page: 1 });
+  const handleSubmit = searchValue => {
+    setSearchValue(searchValue);
+    setGallery([]);
+    setPage(1);
   };
 
-  handleLoadMore = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
+  const handleLoadMore = () => {
+    setPage(prev => prev + 1);
   };
 
-  toggleModal = () => {
-    this.setState(prevState => ({
-      showModal: !prevState.showModal,
-    }));
+  const toggleModal = () => {
+    setShowModal(prev => !prev);
   };
 
-  handleSelectedImage = (largeImageUrl, tags) => {
-    this.setState({
-      selectedImage: largeImageUrl,
-      alt: tags,
-      showModal: true,
-    });
+  const handleSelectedImage = (largeImageUrl, tags) => {
+    setSelectedImage(largeImageUrl);
+    setAlt(tags);
+    setShowModal(true);
   };
 
-  render() {
-    const { gallery, loading, page, showModal, selectedImage, alt, cardTotal } =
-      this.state;
-    const { handleSubmit, handleLoadMore, toggleModal } = this;
-    return (
-      <AppContainer>
-        <Searchbar onSubmit={handleSubmit} />
-        {loading && <Loader />}
+  return (
+    <AppContainer>
+      <Searchbar onSubmit={handleSubmit} />
+      {loading && <Loader />}
 
-        <ImageGallery
-          gallery={gallery}
-          selectedImage={this.handleSelectedImage}
-        />
-        {gallery.length !== 0 && page < Math.ceil(cardTotal / 12) && (
-          <Button onClick={handleLoadMore} />
-        )}
-        {showModal && (
-          <Modal
-            selectedImage={selectedImage}
-            tags={alt}
-            onClick={toggleModal}
-          />
-        )}
-      </AppContainer>
-    );
-  }
-}
-
-export default App;
+      <ImageGallery gallery={gallery} selectedImage={handleSelectedImage} />
+      {gallery.length !== 0 && page < Math.ceil(cardTotal / 12) && (
+        <Button onClick={handleLoadMore} />
+      )}
+      {showModal && (
+        <Modal selectedImage={selectedImage} tags={alt} onClick={toggleModal} />
+      )}
+    </AppContainer>
+  );
+};
 
 const AppContainer = styled.div`
   display: grid;

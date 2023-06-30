@@ -1,44 +1,37 @@
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, { useEffect } from 'react';
 import { ModalWindow, Overlay } from './Modal.styled';
 
-export class Modal extends Component {
-  static propTypes = {
-    selectedImage: PropTypes.string,
-    tags: PropTypes.string,
-    onClick: PropTypes.func,
-  };
+export const Modal = ({ selectedImage, tags, onClick }) => {
+  useEffect(() => {
+    const handleKeyDown = e => {
+      if (e.code === 'Escape') {
+        onClick();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClick]);
 
-  componentDidMount() {
-    window.addEventListener('keydown', this.handleKeyDown);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.handleKeyDown);
-  }
-
-  handleKeyDown = e => {
-    if (e.code === 'Escape') {
-      this.props.onClick();
-    }
-  };
-
-  handleBackdropClick = e => {
+  const handleBackdropClick = e => {
     if (e.target === e.currentTarget) {
-      this.props.onClick();
+      onClick();
     }
   };
 
-  render() {
-    const { selectedImage, tags } = this.props;
-    return (
-      <Overlay onClick={this.handleBackdropClick}>
-        <ModalWindow>
-          <img src={selectedImage} alt={tags} />
-        </ModalWindow>
-      </Overlay>
-    );
-  }
-}
+  return (
+    <Overlay onClick={handleBackdropClick}>
+      <ModalWindow>
+        <img src={selectedImage} alt={tags} />
+      </ModalWindow>
+    </Overlay>
+  );
+};
 
-export default Modal;
+Modal.propTypes = {
+  selectedImage: PropTypes.string,
+  tags: PropTypes.string,
+  onClick: PropTypes.func,
+};
