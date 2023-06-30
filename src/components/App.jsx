@@ -21,22 +21,22 @@ export const App = () => {
     if (searchValue === '') {
       return;
     }
+    const handleFetchGallery = async (searchValue, page) => {
+      setLoading(true);
+      try {
+        const response = await fetchGallery(searchValue, page);
+        const { hits, totalHits } = response;
+        setGallery(prev => [...prev, ...hits]);
+        setCardTotal(totalHits);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     handleFetchGallery(searchValue, page);
   }, [searchValue, page]);
-
-  const handleFetchGallery = async (searchValue, page) => {
-    setLoading(true);
-    try {
-      const response = await fetchGallery(searchValue, page);
-      const { hits, totalHits } = response;
-      setGallery(prev => [...prev, ...hits]);
-      setCardTotal(totalHits);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSubmit = searchValue => {
     setSearchValue(searchValue);
